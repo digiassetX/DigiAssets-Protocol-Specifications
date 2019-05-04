@@ -9,7 +9,7 @@ DigiAssets leverages unique aspects of a truly decentralized blockchain only fou
     1. [Home](Home)
     1. [Introduction](Introduction)
     1. [Benefits](Benefits)
-1. The new DigiAssets Protocol
+1. The DigiAssets Protocol
     1. [DigiAsset Scheme](DigiAsset%20Scheme)
     1. [OP_CODEs](OP_CODEs)
     1. [Number Encoding](Number%20Encoding)
