@@ -1,6 +1,6 @@
 # Getting Started with DigiAssets
 
-Thank you for your interest in DigiAssets! In this guide, we will explain how to quickly set up and start using the open source DigiAssets SDK.
+Thank you for your interest in DigiAssets! In this guide, we will explain how to quickly set up and start using the open source [DigiAssets SDK](https://github.com/DigiByte-Core/digiassets-sdk) to issue your first DigiAsset.
 
 The SDK is meant to be used in your own apps, in order to enable creating and transacting digital assets using the [DigiAssets protocol](https://github.com/DigiByte-Core/DigiAssets-Protocol-Specifications). It's a JavaScript SDK, which can be used in a browser or in a Node.js app. You can use the SDK in a client app, allowing all users to manipulate their tokens securely with their own keys, or you can deploy it on a server-side app and manage transactions on your trusted server.
 
