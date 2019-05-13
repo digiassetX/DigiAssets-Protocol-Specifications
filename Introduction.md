@@ -1,14 +1,14 @@
 # Overview
 ## DigiByte
-DigiByte is now over five eyars old and is one of the fastest, most decentrazlied and secure UTXO blockchains in the world today. In what follows we will use the customary notation of referring to the DigiByte network/protocol as **DigiByte** (Capitalized) and to the units of currency flowing in the DigiByte network as **DigiBytes** (lowercase). Sometimes we will be using native atomic units known as **satoshis** (1 DigiByte = 100 million satoshis).
+Founded in early 2014, DigiByte is the fastest, most decentralized and secure UTXO blockchain in the world today. In what follows we will use the customary notation of referring to the DigiByte network/protocol as **DigiByte** (Camel-case) and to the units of currency flowing in the DigiByte network as **DigiBytes**.
 
-By design, DigiBytes have several highly desired technical attributes
+By design, DigiBytes have several incredibly desirable technical attributes
 * Fixed supply
 * Non-counterfeitable
 * Divisible
 * Easily transportable
 
-On top of that, DigiByte is decentralized. Decentralization adds an extra layer of robustness because the DigiByte network has no single point of failure.
+On top of that, DigiByte is highly decentralized. Decentralization adds an extra layer of robustness because the DigiByte network has no single point of failure. A by-product of this is also that DigiByte is permissionless, in that there is no single entity to ask for permission to use / send / receive DigiBytes or the DigiByte network.
 
 All DigiByte transactions are publicly available on a ledger known as “The Blockchain” and quickly become practically immutable.
 
