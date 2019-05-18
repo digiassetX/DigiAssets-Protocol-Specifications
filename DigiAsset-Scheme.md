@@ -76,7 +76,7 @@ Optionally, we can also transfer assets during a burn transaction.
 | :----: |-------------------------------------|--------|:-------:|
 | 2      | Protocol Identifier                 | `0x4343` ASCII representation of the string CC ("DigiAssets")| OP_RETURN |
 | 1      | Version Number                      | Currently `0x02`| OP_RETURN |
-| 1      | **Transfer** [OP_CODEs](OP_CODEs)| | OP_RETURN |
+| 1      | **Transfer** [OP_CODEs](OP_CODEs)| The "DigiByte" - aka magic happens | OP_RETURN |
 | 20     | SHA1 Torrent Hash | (*optional*), only when metadata is included| OP_RETURN<br/> or (1\|**3**) Multisig  |
 | 32     | SHA256 of [metadata](Metadata) |(*optional*), only when metadata is included<br/>Allows for torrent metadata verification| OP_RETURN <br> or (1\|**2**) or (1\|**3**) Multisig|
 | 2-9 (per<br/>instruction)| [Transfer Instruction](Transfer Instructions)| Encoding the flow of assets from inputs to outputs |OP_RETURN|
