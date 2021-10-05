@@ -30,13 +30,15 @@ Currently, the DigiAssets protocol only uses `(1|2)` and `(1|3)` multisig addres
 
 
 
-## [Metadata](Metadata) and [Torrents](Metadata#torrents)
+## [Metadata](Metadata)
 
 The new DigiAssets protocol supports adding (potentially unlimited amounts of) metadata to DigiAsset transaction ([issuance](#issuance-transaction-encoding) or [transfer](#transfer-transaction-encoding)). Adding metadata is strictly optional.
 
-The metadata is not stored directly on the blockchain but rather stored in plain JSON format using torrents. [Torrents](https://en.wikipedia.org/wiki/BitTorrent) give a decentralized way to share and store data. 
+The metadata is not stored directly on the blockchain but rather stored in plain JSON format using [IPFS](https://en.wikipedia.org/wiki/InterPlanetary_File_System) give a decentralized way to share and store data.
 
-## Blockchain Data Recording logic
+Anyone can download and run a DigiAsset Node to help share this meta data.
+
+## Blockchain Data Recording logic V1-2
 We start by trying to fit everything into the 80 bytes available after the OP_RETURN command.
 * **Without metadata** there is always enough room to fit all asset manipulation instructions after the OP_RETURN.
 * **With metadata** we always have the SHA1 torrent info_hash that needs to be recorded on the blockchain.
@@ -44,6 +46,9 @@ We start by trying to fit everything into the 80 bytes available after the OP_RE
  * If a SHA-256 of the metadata is required, there cannot be enough room for it **and** the SHA1 torrent info_hash inside the 80 bytes OP_RETURN and therefore the SHA-256 hash must go into a multisig address.
     * If we have enough room left within the available 80 bytes in the OP_RETURN for the SHA1 torrent info_hash then we use a (1\|**2**) multisig address for storing the SHA-256 of the metadata.
     * Otherwise, when we **cannot** fit the SHA1 torrent info_hash into the OP_RETURN, both the SHA-256 of the metadata and the SHA1 torrent info_hash are encoded in a (1\|**3**) multisig address.
+
+## Blockchain Data Recording logic V3
+V3 was designed to be more efficient then previous versions.  As such storing data in multi sig wallets was removed allowing for multisig wallets to be used to receive assets.
 
 
 # Asset Manipulating Transactions
@@ -57,7 +62,7 @@ A transaction where only asset transfer occurs, no issuance.
 In a burn transaction, a specified amount is being reduced from the total supply of an asset, i.e. these units are being "burned" and will not be available for further transfer.
 Optionally, we can also transfer assets during a burn transaction.
 
-## Issuance Transaction Encoding
+## Issuance Transaction Encoding V1-2
 
 | Bytes|Description              |Comments|Stored in|
 | :----: |-------------------------------------|--------|-------|
@@ -70,6 +75,19 @@ Optionally, we can also transfer assets during a burn transaction.
 |2-9 (per<br/>instruction)| [Transfer Instruction](Transfer Instructions)| Encoding the flow of assets from inputs to outputs |OP_RETURN|
 | 1      | [Issuance Flags](#issuance-flag)     | At the moment only 6 bits are used| OP_RETURN|
 
+## Issuance Transaction Encoding V3
+
+| Bytes|Description              |Comments|Stored in|
+| :----: |-------------------------------------|--------|-------|
+| 2      | Protocol Identifier                 | `0x4441` ASCII representation of the string DA ("DigiAsset")| OP_RETURN |
+| 1      | Version Number                      | Currently `0x03`| OP_RETURN |
+| 1      | **Issuance** [OP_CODEs](OP_CODEs)| The "DigiByte" - aka where the magic happens | OP_RETURN |
+| 32     | SHA256 of [metadata](Metadata) |(*optional*), only when metadata is included<br/>Allows for torrent metadata verification| OP_RETURN
+| 1-7    | [Amount](#amount) of **issued units**   | Encoded with the [Encoding Scheme](Number Encoding)|OP_RETURN|
+| variable | Rules | Only present if Opcode 3 or 4 is used | OP_RETURN
+|2-9 (per<br/>instruction)| [Transfer Instruction](Transfer Instructions)| Encoding the flow of assets from inputs to outputs |OP_RETURN|
+| 1      | [Issuance Flags](#issuance-flag)     | At the moment only 6 bits are used| OP_RETURN|
+
 ## Transfer Transaction Encoding
 
 | Bytes |Description                   |Comments|Stored in|
@@ -77,8 +95,6 @@ Optionally, we can also transfer assets during a burn transaction.
 | 2      | Protocol Identifier                 | `0x4441` ASCII representation of the string DA ("DigiAsset")| OP_RETURN |
 | 1      | Version Number                      | Currently `0x02`| OP_RETURN |
 | 1      | **Transfer** [OP_CODEs](OP_CODEs)| The "DigiByte" - aka where the magic happens | OP_RETURN |
-| 20     | SHA1 Torrent Hash | (*optional*), only when metadata is included| OP_RETURN<br/> or (1\|**3**) Multisig  |
-| 32     | SHA256 of [metadata](Metadata) |(*optional*), only when metadata is included<br/>Allows for torrent metadata verification| OP_RETURN <br> or (1\|**2**) or (1\|**3**) Multisig|
 | 2-9 (per<br/>instruction)| [Transfer Instruction](Transfer Instructions)| Encoding the flow of assets from inputs to outputs |OP_RETURN|
 
 ## Burn Transaction Encoding
@@ -87,7 +103,7 @@ Also, the [Transfer Instructions](Transfer Instructions) will be interpreted dif
 
 #### Amount
 
-The number of issued units. A signed integer ranging from `1..10,000,000,000,000,000 (10^16)` encoded with our [Encoding Scheme](Number Encoding).
+The number of issued units. A signed integer ranging from `1..18,014,398,509,481,983 (≈10^16)` encoded with our [Encoding Scheme](Number Encoding).
 
 &#42; Relevant only in the case of an issuance transaction<br>
 &#42; Due to a bug in the original implementation, CC version 0x01 interprets the encoded amount as (amount / 10^divisiblity)
@@ -125,13 +141,11 @@ The 2-bit codes for each policy are as follows:
 |hybrid				 | 0x01	 |
 |dispersed			 | 0x02	 |
 
-&#42; Note: **hybrid** is an intermediate aggregation policy and currently a placeholder for future use.
-
 #### OP_CODE
 The [Issuance](#issuance_op_return) or [Transfer](#transfer_op_return) [OP_CODE](OP_CODEs)s to be executed during the processing of the transaction.
 
 ### Asset processing capacity per transaction
 Note that the amount of assets that can be transferred in one transaction varies according to a number of parameters.
-For example, if we have no metadata and all transfers use the minimum of 2 bytes, we may process up to 38 transfer instructions in a single *transfer* transaction and up to 37 (provided the issued amount can be encoded with 1 byte) in a single *issuance* transaction. 
+For example, if we have no metadata and all transfers use the minimum of 2 bytes, we may process up to 38 transfer instructions in a single *transfer* transaction and up to 37 (provided the issued amount can be encoded with 1 byte) in a single *issuance* transaction.
 
-In fact, the theoretical limit is much higher, due to our novel [encoding of transfer instructions](Transfer Instructions) which sends all unaccounted assets to the last output (similar to how miners fee work in DigiByte). With this encoding, special cases can *in principle* be constructed where 1 transfer transaction processes an unlimited amount of assets, determined only by the asset content of the inputs.
+In V3 this was increased to 1023 through the use of range instructions which allow 1 instruction to send assets to many outputs as long as similar quantities where needed.
